@@ -4,74 +4,52 @@ import inmemory.Entity.Topic;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.ListIterator;
+import java.util.*;
 
 @Service
 public class TopicService {
-    ArrayList<Topic> array = new ArrayList<Topic>();
+
+    private final static String NOT_AVAILABLE = "NA";
+
+    Map<String, Topic> stringTopicMap = new HashMap<>();
 
     TopicService() {
-        array.add(new Topic("1", "Java", "OOP language"));
-        array.add(new Topic("2", "PHP", "Scripting language"));
     }
 
-    public ArrayList<Topic> getAll() {
-        return this.array ;
+    public List<Topic> getAll() {
+        return (List<Topic>) this.stringTopicMap.values();
     }
 
     public Topic getOne(@PathVariable String name) {
-        for (Topic t : this.array)
-            if(t.getName().equals(name))
-                return t;
-        return new Topic("0", "null", "Object Not Found");
+        Topic topic = this.stringTopicMap.get(name);
+        if(topic==null)
+            return new Topic(NOT_AVAILABLE, "null", "Topic Not Found");
+        return topic;
     }
 
-    public ArrayList<Topic> createOne(Topic t) {
-        this.array.add(t) ;
-        return this.array;
+    public List<Topic> createOne(Topic t) {
+        this.stringTopicMap.put(t.getName(), t) ;
+        return (List<Topic>) this.stringTopicMap.values();
     }
 
-    public ArrayList<Topic> createAll(Topic[] topics) {
-        Collections.addAll(this.array, topics);
-        return this.array;
+    public List<Topic> createAll(Topic[] topics) {
+        for (Topic singleTopic: topics)
+            this.stringTopicMap.put(singleTopic.getName(), singleTopic);
+        return (List<Topic>) this.stringTopicMap.values();
     }
 
-    public ArrayList<Topic> deleteOne(String name) {
-        for (Topic t : this.array)
-            if(t.getName().equals(name))
-                this.array.remove(t);
-        return this.array;
+    public List<Topic> deleteOne(String name) {
+        this.stringTopicMap.remove(name);
+        return (List<Topic>) this.stringTopicMap.values();
     }
 
-    public String deleteAll() {
-        this.array.clear();
-        this.array.add(new Topic("1", "Java", "OOP language"));
-        this.array.add(new Topic("2", "PHP", "Scripting language"));
-        return "List Set to Default";
+    public List<Topic> deleteAll() {
+        this.stringTopicMap.clear();
+        return (List<Topic>) this.stringTopicMap.values();
     }
 
-    public ArrayList<Topic> updateOne(String name, Topic topic) {
-        boolean found = false ;
-        Topic currentTopic = null ;
-        ListIterator<Topic> iterator = this.array.listIterator();
-        while(iterator.hasNext()){
-            currentTopic = iterator.next();
-            if(currentTopic.getName().equals(name)){
-                found = true ;
-                break;
-            }
-        }
-        ArrayList <Topic> noResult = new ArrayList<Topic>();
-        if(found) {
-            this.array.remove(currentTopic);
-            this.array.add(topic);
-            return this.array;
-        }
-        else {
-            noResult.add(new Topic("0", "null", "Object Not Found"));
-        }
-        return noResult;
+    public List<Topic> updateOne(String name, Topic topic) {
+        this.stringTopicMap.put(name, topic);
+        return (List<Topic>) this.stringTopicMap.values();
     }
 }
